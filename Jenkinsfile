@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKER_CREDENTIALS_ID = 'dckr_pat_vl5kFsGwJTlZsjhUCM6_T931cIE'
-        DOCKER_IMAGE = 'y3ko/jenkins:test1'
+        DOCKER_IMAGE = 'y3ko/jenkins:test2'
     }
 
     stages {
