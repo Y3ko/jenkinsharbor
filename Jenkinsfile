@@ -2,7 +2,6 @@ pipeline {
     agent none // Dış agent tanımı kullanmamak için none kullanıyoruz.
 
     environment {
-        DOCKER_CREDENTIALS_ID = 'Harbor12345'
         DOCKER_IMAGE = 'dockerhub.yekcan.com/library/jenkins:test2'
     }
 
@@ -41,7 +40,9 @@ spec:
                     script {
                         // Docker imajını derle ve push et.
                         sh "docker build -t ${env.DOCKER_IMAGE} ."
-                        sh "echo ${env.DOCKER_CREDENTIALS_ID} | docker login dockerhub.yekcan.com --username admin --password-stdin"
+                        withCredentials([usernamePassword(credentialsId: 'Harbor12345', usernameVariable: 'admin', passwordVariable: 'REGISTRY_PASS')]) {
+                            sh "echo $REGISTRY_PASS | docker login dockerhub.yekcan.com --username $REGISTRY_USER --password-stdin"
+                        }
                         sh "docker push ${env.DOCKER_IMAGE}"
                     }
                 }
