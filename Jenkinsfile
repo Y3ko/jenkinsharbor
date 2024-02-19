@@ -1,41 +1,43 @@
 pipeline {
-    agent {
-        kubernetes {
-            inheritFrom 'docker-agent' // Kubernetes agent etiketi, doğru kullanım burada
-        }
-    }
+    agent none // Dış agent tanımı kullanmamak için none kullanıyoruz.
 
     environment {
-        DOCKER_CREDENTIALS_ID = '8742b749-d1d1-4c10-aecf-328c5d244315' // Jenkins'de kaydedilen Docker Hub kimlik bilgilerinin ID'si
-        DOCKER_IMAGE = 'y3ko/jenkins:test1' // Docker imaj adı ve etiketi
+        DOCKER_CREDENTIALS_ID = '8742b749-d1d1-4c10-aecf-328c5d244315'
+        DOCKER_IMAGE = 'y3ko/jenkins:test1'
     }
 
     stages {
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    // Docker imajını derleme komutu, docker.build'in doğru kullanımı için 'docker' değil, 'docker.build' kullanılmalıdır
-                    docker.build("${env.DOCKER_IMAGE}")
+        stage('Build and Push Docker Image') {
+            agent {
+                kubernetes {
+                    inheritFrom 'docker-agent' // Burada, Docker daemon'una erişimi olan bir Kubernetes pod şablonunu miras alıyoruz.
                 }
             }
-        }
-
-        stage('Push Image to Docker Hub') {
             steps {
-                script {
-                    // Docker Hub kimlik bilgilerini kullanarak Docker imajını Docker Hub'a push et
-                    docker.withRegistry('https://registry.hub.docker.com', "${env.DOCKER_CREDENTIALS_ID}") {
-                        docker.image("${env.DOCKER_IMAGE}").push()
+                container('docker') { // 'docker' container'ında çalışacak komutlar.
+                    script {
+                        // Docker imajını derle ve push et.
+                        def builtImage = docker.build("${env.DOCKER_IMAGE}")
+                        docker.withRegistry('https://registry.hub.docker.com', "${env.DOCKER_CREDENTIALS_ID}") {
+                            builtImage.push()
+                        }
                     }
                 }
             }
         }
 
         stage('Clean Up') {
+            agent {
+                kubernetes {
+                    inheritFrom 'docker-agent'
+                }
+            }
             steps {
-                script {
-                    // Derleme sonrası temizlik işlemleri, kullanılan değişkenin doğru şekilde kullanımı
-                    sh "docker rmi ${env.DOCKER_IMAGE}"
+                container('docker') {
+                    script {
+                        // Derleme sonrası temizlik işlemleri.
+                        sh "docker rmi ${env.DOCKER_IMAGE}"
+                    }
                 }
             }
         }
