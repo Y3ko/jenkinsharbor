@@ -2,8 +2,8 @@ pipeline {
     agent none // Dış agent tanımı kullanmamak için none kullanıyoruz.
 
     environment {
-        DOCKER_CREDENTIALS_ID = 'dckr_pat_vl5kFsGwJTlZsjhUCM6_T931cIE'
-        DOCKER_IMAGE = 'y3ko/jenkins:test2'
+        DOCKER_CREDENTIALS_ID = 'Harbor12345'
+        DOCKER_IMAGE = 'dockerhub.yekcan.com/library/jenkins:test2'
     }
 
     stages {
@@ -41,7 +41,7 @@ spec:
                     script {
                         // Docker imajını derle ve push et.
                         sh "docker build -t ${env.DOCKER_IMAGE} ."
-                        sh "echo ${env.DOCKER_CREDENTIALS_ID} | docker login --username y3ko --password-stdin"
+                        sh "echo ${env.DOCKER_CREDENTIALS_ID} | docker login dockerhub.yekcan.com --username admin --password-stdin"
                         sh "docker push ${env.DOCKER_IMAGE}"
                     }
                 }
