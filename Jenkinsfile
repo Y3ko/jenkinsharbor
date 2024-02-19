@@ -41,7 +41,7 @@ spec:
                     script {
                         // Docker imajını derle ve push et.
                         sh "docker build -t ${env.DOCKER_IMAGE} ."
-                        sh "echo ${env.DOCKER_CREDENTIALS_ID} | docker login --username your-docker-hub-username --password-stdin"
+                        sh "echo ${env.DOCKER_CREDENTIALS_ID} | docker login --username y3ko --password-stdin"
                         sh "docker push ${env.DOCKER_IMAGE}"
                     }
                 }
