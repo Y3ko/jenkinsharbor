@@ -2,7 +2,7 @@ pipeline {
     agent none // Dış agent tanımı kullanmamak için none kullanıyoruz.
 
     environment {
-        DOCKER_CREDENTIALS_ID = '8742b749-d1d1-4c10-aecf-328c5d244315'
+        DOCKER_CREDENTIALS_ID = 'dckr_pat_vl5kFsGwJTlZsjhUCM6_T931cIE'
         DOCKER_IMAGE = 'y3ko/jenkins:test1'
     }
 
