@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            // Doğru kullanım: label 'my-kubernetes-agent'
+            label 'docker-agent'
+        }
 
     environment {
         DOCKER_CREDENTIALS_ID = '8742b749-d1d1-4c10-aecf-328c5d244315' // Jenkins'de kaydedilen Docker Hub kimlik bilgilerinin ID'si
