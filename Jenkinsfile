@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'docker-agent' // Kubernetes agent etiketi, doğru kullanım burada
+            inheritForm 'docker-agent' // Kubernetes agent etiketi, doğru kullanım burada
         }
     }
 
