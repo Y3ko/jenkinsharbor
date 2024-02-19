@@ -47,15 +47,5 @@ spec:
                 }
             }
         }
-
-        stage('Clean Up') {
-            agent any
-            steps {
-                script {
-                    // Derleme sonrası temizlik işlemleri.
-                    sh "docker rmi ${env.DOCKER_IMAGE}"
-                }
-            }
-        }
     }
 }
