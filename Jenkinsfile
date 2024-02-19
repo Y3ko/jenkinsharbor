@@ -38,7 +38,7 @@ spec:
                 container('docker') {
                     script {
                         sh "docker build -t ${env.DOCKER_IMAGE} ."
-                        withCredentials([usernamePassword(credentialsId: 'myDockerHubCredentials', usernameVariable: 'REGISTRY_USER', passwordVariable: 'REGISTRY_PASS')]) {
+                        withCredentials([usernamePassword(credentialsId: 'harbor', usernameVariable: 'REGISTRY_USER', passwordVariable: 'REGISTRY_PASS')]) {
                             sh "echo $REGISTRY_PASS | docker login dockerhub.yekcan.com --username $REGISTRY_USER --password-stdin"
                         }
                         sh "docker push ${env.DOCKER_IMAGE}"
