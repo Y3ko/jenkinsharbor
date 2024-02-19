@@ -24,7 +24,7 @@ spec:
     image: docker:19.03.12-dind
     env:
     - name: DOCKER_HOST
-      value: tcp://localhost:2375
+      value: http://192.168.1.120:2375
     securityContext:
       privileged: true
     volumeMounts:
