@@ -10,34 +10,50 @@ pipeline {
         stage('Build and Push Docker Image') {
             agent {
                 kubernetes {
-                    inheritFrom 'docker-agent' // Burada, Docker daemon'una erişimi olan bir Kubernetes pod şablonunu miras alıyoruz.
+                    // Docker-in-Docker için bir pod şablonu tanımlıyoruz
+                    defaultContainer 'jnlp'
+                    yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    some-label: docker-builder
+spec:
+  containers:
+  - name: docker
+    image: docker:19.03.12-dind
+    env:
+    - name: DOCKER_HOST
+      value: tcp://localhost:2375
+    securityContext:
+      privileged: true
+    volumeMounts:
+    - name: docker-graph-storage
+      mountPath: /var/lib/docker
+  volumes:
+  - name: docker-graph-storage
+    emptyDir: {}
+"""
                 }
             }
             steps {
-                container('docker') { // 'docker' container'ında çalışacak komutlar.
+                container('docker') {
                     script {
                         // Docker imajını derle ve push et.
-                        def builtImage = docker.build("${env.DOCKER_IMAGE}")
-                        docker.withRegistry('https://registry.hub.docker.com', "${env.DOCKER_CREDENTIALS_ID}") {
-                            builtImage.push()
-                        }
+                        sh "docker build -t ${env.DOCKER_IMAGE} ."
+                        sh "echo ${env.DOCKER_CREDENTIALS_ID} | docker login --username your-docker-hub-username --password-stdin"
+                        sh "docker push ${env.DOCKER_IMAGE}"
                     }
                 }
             }
         }
 
         stage('Clean Up') {
-            agent {
-                kubernetes {
-                    inheritFrom 'docker-agent'
-                }
-            }
+            agent any
             steps {
-                container('docker') {
-                    script {
-                        // Derleme sonrası temizlik işlemleri.
-                        sh "docker rmi ${env.DOCKER_IMAGE}"
-                    }
+                script {
+                    // Derleme sonrası temizlik işlemleri.
+                    sh "docker rmi ${env.DOCKER_IMAGE}"
                 }
             }
         }
