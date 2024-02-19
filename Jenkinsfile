@@ -1,5 +1,5 @@
 pipeline {
-    agent none // Dış agent tanımı kullanmamak için none kullanıyoruz.
+    agent none
 
     environment {
         DOCKER_IMAGE = 'dockerhub.yekcan.com/library/jenkins:test2'
@@ -9,7 +9,6 @@ pipeline {
         stage('Build and Push Docker Image') {
             agent {
                 kubernetes {
-                    // Docker-in-Docker için bir pod şablonu tanımlıyoruz
                     defaultContainer 'jnlp'
                     yaml """
 apiVersion: v1
@@ -23,7 +22,7 @@ spec:
     image: docker:19.03.12-dind
     env:
     - name: DOCKER_HOST
-      value: 192.168.1.120:2375
+      value: tcp://docker:2375
     securityContext:
       privileged: true
     volumeMounts:
@@ -38,10 +37,10 @@ spec:
             steps {
                 container('docker') {
                     script {
-                        // Docker imajını derle ve push et.
                         sh "docker build -t ${env.DOCKER_IMAGE} ."
-                        sh "echo Harbor12345 | docker login dockerhub.yekcan.com --username admin --password-stdin"
-                   
+                        withCredentials([usernamePassword(credentialsId: 'myDockerHubCredentials', usernameVariable: 'REGISTRY_USER', passwordVariable: 'REGISTRY_PASS')]) {
+                            sh "echo $REGISTRY_PASS | docker login dockerhub.yekcan.com --username $REGISTRY_USER --password-stdin"
+                        }
                         sh "docker push ${env.DOCKER_IMAGE}"
                     }
                 }
