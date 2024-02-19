@@ -40,9 +40,8 @@ spec:
                     script {
                         // Docker imajını derle ve push et.
                         sh "docker build -t ${env.DOCKER_IMAGE} ."
-                        withCredentials([usernamePassword(credentialsId: 'Harbor12345', usernameVariable: 'admin', passwordVariable: 'REGISTRY_PASS')]) {
-                            sh "echo $REGISTRY_PASS | docker login dockerhub.yekcan.com --username $REGISTRY_USER --password-stdin"
-                        }
+                        sh "echo Harbor12345 | docker login dockerhub.yekcan.com --username admin --password-stdin"
+                   
                         sh "docker push ${env.DOCKER_IMAGE}"
                     }
                 }
